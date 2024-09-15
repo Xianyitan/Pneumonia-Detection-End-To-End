@@ -1,0 +1,117 @@
+schema: '2.0'
+stages:
+  data_ingestion:
+    cmd: python src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: ece1fbf807428a8e89ea74fa9ce0cda4
+      size: 801
+    - path: src/cnnClassifier/pipeline/stage_01_data_ingestion.py
+      hash: md5
+      md5: d4cc4d5a38c5cc6661da3cdccce29a71
+      size: 892
+    outs:
+    - path: artifacts/data_ingestion/brain_tumor_dataset
+      hash: md5
+      md5: 8d77130541d5cd05acd22e04939d2ae2.dir
+      size: 8672762
+      nfiles: 253
+  prepare_base_model:
+    cmd: python src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+    deps:
+    - path: config/config.yaml
+      hash: md5
+      md5: ece1fbf807428a8e89ea74fa9ce0cda4
+      size: 801
+    - path: src/cnnClassifier/pipeline/stage_02_prepare_base_model.py
+      hash: md5
+      md5: 7f489f399f29418a626611a316d95982
+      size: 1007
+    params:
+      params.yaml:
+        CLASSES: 2
+        IMAGE_SIZE:
+        - 224
+        - 244
+        - 3
+        INCLUDE_TOP: false
+        LEARNING_RATE: 0.01
+        WEIGHTS: imagenet
+    outs:
+    - path: artifacts/prepare_base_model
+      hash: md5
+      md5: 9c17454cb54a62367980b6705b07f973.dir
+      size: 118061435
+      nfiles: 2
+  training:
+    cmd: python src/cnnClassifier/pipeline/stage_03_training_model.py
+    deps:
+    - path: artifacts/data_ingestion/brain_tumor_dataset
+      hash: md5
+      md5: 8d77130541d5cd05acd22e04939d2ae2.dir
+      size: 8672762
+      nfiles: 253
+    - path: artifacts/prepare_base_model
+      hash: md5
+      md5: 9c17454cb54a62367980b6705b07f973.dir
+      size: 118061435
+      nfiles: 2
+    - path: config/config.yaml
+      hash: md5
+      md5: ece1fbf807428a8e89ea74fa9ce0cda4
+      size: 801
+    - path: src/cnnClassifier/components/prepare_callbacks.py
+      hash: md5
+      md5: 0f2cf37d15c3d4973e333a77d588e56c
+      size: 998
+    - path: src/cnnClassifier/pipeline/stage_03_training_model.py
+      hash: md5
+      md5: ad2be49da80bfb92710e71528f2c9ff5
+      size: 1256
+    params:
+      params.yaml:
+        AUGMENTATION: true
+        BATCH_SIZE: 16
+        EPOCHS: 3
+        IMAGE_SIZE:
+        - 224
+        - 244
+        - 3
+    outs:
+    - path: artifacts/training/model.keras
+      hash: md5
+      md5: 50296515358ec98212888d82894de62a
+      size: 59537747
+  evaluation:
+    cmd: python src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+    deps:
+    - path: artifacts/data_ingestion/brain_tumor_dataset
+      hash: md5
+      md5: 8d77130541d5cd05acd22e04939d2ae2.dir
+      size: 8672762
+      nfiles: 253
+    - path: artifacts/training/model.keras
+      hash: md5
+      md5: 50296515358ec98212888d82894de62a
+      size: 59537747
+    - path: config/config.yaml
+      hash: md5
+      md5: ece1fbf807428a8e89ea74fa9ce0cda4
+      size: 801
+    - path: src/cnnClassifier/pipeline/stage_04_model_evaluation.py
+      hash: md5
+      md5: a82ebed3931dec7255c99a982744473a
+      size: 869
+    params:
+      params.yaml:
+        BATCH_SIZE: 16
+        IMAGE_SIZE:
+        - 224
+        - 244
+        - 3
+    outs:
+    - path: scores.json
+      hash: md5
+      md5: cf8df4a02c3e32a85a89f70940ba7155
+      size: 73
