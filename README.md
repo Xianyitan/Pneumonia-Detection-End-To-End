@@ -1,1 +1,1 @@
-# Pneumonia-Detection-End-To-End
+# Skin-Cancer-Classification-End-To-End
